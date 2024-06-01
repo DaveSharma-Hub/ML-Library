@@ -9,7 +9,6 @@ namespace Tensor{
        unsigned int rank;
        std::vector<unsigned int> layout;
 
-       void setFormat();
        unsigned int totalLength();
     }typedef TensorFormat;
 
@@ -17,7 +16,7 @@ namespace Tensor{
     class TensorDataStructure{
         private:
             std::vector<T> data;
-            TensorFormat dataFormat;
+            TensorFormat format;
 
         public:
             TensorDataStructure(TensorFormat& format);
@@ -26,5 +25,7 @@ namespace Tensor{
             unsigned int getRank();
             std::vector<unsigned int> getLayout();
             T* getRawData();
+            void print();
+            T getValue(std::vector<T> index);
     };
 }

@@ -1,8 +1,10 @@
 #include "./src/operations/matrixMultiplication/matrixMultiplication.cpp"
+#include "./src/tensor/Tensor.cpp"
 #include <iostream>
 #include <chrono>
 #include <time.h> 
 #include <assert.h>
+#include <vector>
 
 using namespace operations;
 using namespace std;
@@ -45,16 +47,32 @@ void test(double* sum1, double* sum2, double* sum3){
 
 
 int main() {
-    srand(time(0)); 
-    double* first = new double(0);
-    double* second = new double(0);
-    double* third = new double(0);
-    int count = 50;
+    // srand(time(0)); 
+    // double* first = new double(0);
+    // double* second = new double(0);
+    // double* third = new double(0);
+    // int count = 50;
+    // for(int i=0;i<count;i++){
+    //     test(first, second, third);
+    // }
+    // cout<<"Naive:"<<*first/count<<endl;
+    // cout<<"Transposed:"<<*second/count<<endl;
+    // cout<<"Wrong:"<<*third/count<<endl;
+
+    int count = 20;
+    int* data = (int*)malloc(sizeof(int) * count);
     for(int i=0;i<count;i++){
-        test(first, second, third);
+        data[i] = i;
     }
-    cout<<"Naive:"<<*first/count<<endl;
-    cout<<"Transposed:"<<*second/count<<endl;
-    cout<<"Wrong:"<<*third/count<<endl;
+    std::vector<unsigned int> layout{2,5,2,8};
+    std::vector<unsigned int> strides{2,10,20,160};
+    unsigned int rank = 4;
+    Tensor::TensorFormat tensorFormat = Tensor::TensorFormat{strides:strides, rank:rank, layout:layout};
+    Tensor::TensorDataStructure<int> tensor(tensorFormat);
+    tensor.setData(data);
+
+    tensor.print();
+    std::cout<<std::endl;
+    std::cout<<tensor.getValue({0,3,1})<<endl;
     return 0;
 }
