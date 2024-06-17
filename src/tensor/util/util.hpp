@@ -2,6 +2,7 @@
 #include "../Tensor.hpp"
 #include <vector>
 #include <assert.h>
+#include <iostream>
 
 bool checkStridesFromLayout(std::vector<unsigned int>& strides, std::vector<unsigned int>& layout){
     if(layout.size()==0){
@@ -14,6 +15,7 @@ bool checkStridesFromLayout(std::vector<unsigned int>& strides, std::vector<unsi
     for(int i=1;i<layout.size();i++){
         intermediary *= layout[i];
         if(intermediary != strides[i]){
+            std::cout<<intermediary<<" "<<strides[i]<<std::endl;
             return false;
         }
     }

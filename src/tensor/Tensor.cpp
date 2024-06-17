@@ -50,7 +50,7 @@ void Tensor::TensorDataStructure<T>::print(){
 }
 
 template<class T>
-T Tensor::TensorDataStructure<T>::getValue(std::vector<T> index){
+int Tensor::TensorDataStructure<T>::getFinalIndex(std::vector<unsigned int>& index){
     if(index.size()+1!=format.layout.size()){
         // do better checks here
         //throw error
@@ -60,5 +60,17 @@ T Tensor::TensorDataStructure<T>::getValue(std::vector<T> index){
         finalIndex += index[i] * format.layout[i+1];
     }
     finalIndex += index[index.size()-1];
+    return finalIndex;
+}
+
+template<class T>
+T Tensor::TensorDataStructure<T>::getValue(std::vector<unsigned int>& index){
+    int finalIndex = this->getFinalIndex(index);
     return this->data[finalIndex];
+}
+
+template<class T>
+void Tensor::TensorDataStructure<T>::setValue(std::vector<unsigned int>& index, T value){
+    int finalIndex = this->getFinalIndex(index);
+    this->data[finalIndex] = value;
 }
