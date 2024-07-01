@@ -10,8 +10,19 @@ unsigned int Tensor::TensorFormat::totalLength(){
     // Throw error
 }
 
-template<class T>
-Tensor::TensorDataStructure<T>::TensorDataStructure(Tensor::TensorFormat& format){
+template <class T>
+Tensor::TensorDataStructure<T>::TensorDataStructure(){};
+
+template <class T>
+Tensor::TensorDataStructure<T>::TensorDataStructure(Tensor::TensorFormat &format)
+{
+    validateTensorFormat(format);
+    this->format = format;
+}
+
+template <class T>
+void Tensor::TensorDataStructure<T>::setTensorFormat(TensorFormat &format)
+{
     validateTensorFormat(format);
     this->format = format;
 }
@@ -19,6 +30,7 @@ Tensor::TensorDataStructure<T>::TensorDataStructure(Tensor::TensorFormat& format
 template<class T>
 void Tensor::TensorDataStructure<T>::setData(T* d){
     std::copy(d, d + this->format.totalLength(), std::back_inserter(this->data));
+    this->isEmpty = false;
 }
 
 template<class T>
@@ -73,4 +85,22 @@ template<class T>
 void Tensor::TensorDataStructure<T>::setValue(std::vector<unsigned int>& index, T value){
     int finalIndex = this->getFinalIndex(index);
     this->data[finalIndex] = value;
+}
+
+template <class T>
+void Tensor::TensorDataStructure<T>::allocateData(){
+    // assert(this->format);
+    
+    unsigned int size = 0;
+    for(int i=0;i<this->format.layout.size()-1;i++){
+        size += this->format.layout[i];
+    }
+    this->data.reserve(size);
+    this->isEmpty = false;
+}
+
+template <class T>
+Tensor::TensorFormat &Tensor::TensorDataStructure<T>::getFormat()
+{
+    return this->format;
 }

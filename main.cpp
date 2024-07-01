@@ -1,5 +1,6 @@
 #include "./src/operations/matrixMultiplication/matrixMultiplication.cpp"
 #include "./src/tensor/Tensor.cpp"
+#include "./src/operations/regression/linear/linearRegression.cpp"
 #include <iostream>
 #include <chrono>
 #include <time.h> 
@@ -170,5 +171,18 @@ int main() {
         }
     }
 
+    vector<vector<double>> data;
+    for(int i=0;i<100;i++){
+        vector<double> tmp;
+        for(int j=0;j<10;j++){
+            tmp.push_back(j);
+        }
+        data.push_back(tmp);
+    }
+
+    Regression::Linear<double> lrModel(10,0.001);
+    // lrModel.setInputTensor(createTensorMatrix(3,3,true));
+    lrModel.setInputData(data);
+    lrModel.run();
     return 0;
 }

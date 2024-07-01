@@ -18,9 +18,12 @@ namespace Tensor{
             std::vector<T> data;
             TensorFormat format;
             int getFinalIndex(std::vector<unsigned int>& index);
-
         public:
+            bool isEmpty = true;
+
+            TensorDataStructure();
             TensorDataStructure(TensorFormat& format);
+            void setTensorFormat(TensorFormat& format);
             void setData(T* d);
             std::vector<unsigned int> getStrides();
             unsigned int getRank();
@@ -29,5 +32,7 @@ namespace Tensor{
             void print();
             T getValue(std::vector<unsigned int>& index);
             void setValue(std::vector<unsigned int>& index, T value);
+            void allocateData();
+            TensorFormat& getFormat();
     };
 }
