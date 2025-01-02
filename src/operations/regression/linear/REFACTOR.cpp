@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include <climits>
 
 class Matrix{
   public:
@@ -84,6 +85,22 @@ class Matrix{
         }
         Matrix copyMatrix(copy);
         return copyMatrix;
+    }
+    
+    void Normalize(){
+        double max = INT_MIN;
+        for(std::vector<double> row:this->array){
+            for(double v: row){
+                if(v>max){
+                    max = v;
+                }
+            }
+        }
+        for(int i=0;i<this->array.size();i++){
+            for(int j=0;j<this->array[i].size();j++){
+                array[i][j] = array[i][j]/max;
+            }
+        }
     }
     
   private:
@@ -189,7 +206,14 @@ class LinearRegression{
         return this;
     }
     
+    void normalizeAll(){
+        weights.Normalize();
+        rawData.Normalize();
+        output.Normalize();
+    }
+    
     void start(){
+        this->normalizeAll();
         Matrix transposedRawData = rawData.copy();
         transposedRawData.transpose();
         for(uint64_t i=0;i<this->iterations;i++){
@@ -217,7 +241,7 @@ int main(){
     // final.transpose();
     // final.print();
     
-    LinearRegression pipeline(10, std::vector<std::vector<double>>{{0,0}});
+    LinearRegression pipeline(1000, std::vector<std::vector<double>>{{1,1}});
     pipeline.initializeData(std::vector<std::vector<double>>{{1,5},{2,8},{3,10},{4,12}},std::vector<std::vector<double>>{{7,12,11,15}})->start();
     pipeline.getWeights().print();
     
