@@ -4,9 +4,11 @@
 
 class Matrix{
   public:
+    Matrix(){};
+    
     Matrix(std::vector<std::vector<double>> input_): array(input_){};
     
-    Matrix operator*(Matrix& a){
+    Matrix operator*(Matrix a){
         return Matrix(this->matrixMult(
             this->array,
             a.getArray()
@@ -18,13 +20,13 @@ class Matrix{
             value
         ));
     }
-    Matrix operator+(Matrix& a){
+    Matrix operator+(Matrix a){
         return Matrix(this->matrixAddition(
             this->array,
             a.getArray()
         ));
     }
-    Matrix operator-(Matrix& a){
+    Matrix operator-(Matrix a){
         return Matrix(this->matrixSubtraction(
             this->array,
             a.getArray()
@@ -71,7 +73,7 @@ class Matrix{
         this->array = finalMatrix;
     }
     
-    Matrix* copy(){
+    Matrix copy(){
         std::vector<std::vector<double>> copy;
         for(std::vector<double> arr: this->array){
             std::vector<double> row;
@@ -80,7 +82,7 @@ class Matrix{
             }
             copy.push_back(row);
         }
-        Matrix* copyMatrix = new Matrix(copy);
+        Matrix copyMatrix(copy);
         return copyMatrix;
     }
     
@@ -174,28 +176,35 @@ class Matrix{
 
 class LinearRegression{
   public:
-    LinearRegression(uint64_t iterations_, std::vector<std::vector<double>> initialWeights_): iterations(iterations_){
-        this->weights = new Matrix(initialWeights_);   
+    LinearRegression(uint64_t iterations_, std::vector<std::vector<double>> initialWeights_):iterations(iterations_){
+        Matrix weightMatrix(initialWeights_); 
+        this->weights = weightMatrix;  
     }
     
     LinearRegression* initializeData(std::vector<std::vector<double>> data_, std::vector<std::vector<double>> output_){
-        this->rawData = new Matrix(data_);
-        this->output = new Matrix(output_);
+        Matrix rawMatrix(data_);
+        Matrix outputMatrix(output_);
+        this->rawData = rawMatrix;
+        this->output = outputMatrix;
         return this;
     }
     
     void start(){
-        Matrix* transposedRawData = rawData->copy();
-        transposedRawData->transpose();
+        Matrix transposedRawData = rawData.copy();
+        transposedRawData.transpose();
         for(uint64_t i=0;i<this->iterations;i++){
-            weights = weights - (weights * transposedRawData - output) * *rawData * 2; 
+            weights = weights - (((weights * transposedRawData) - output) * rawData); 
         }
     }
     
+    Matrix& getWeights(){
+        return this->weights;
+    }
+    
   private:
-    Matrix* weights;
-    Matrix* rawData;
-    Matrix* output;
+    Matrix weights;
+    Matrix rawData;
+    Matrix output;
     uint64_t iterations;
 };
 
@@ -203,9 +212,15 @@ class LinearRegression{
 int main(){
     Matrix first(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
     Matrix second(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
-    Matrix final = first - 2 ;
-    final.transpose();
-    final.print();
+    Matrix third(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
+    // Matrix final = ((first) - ((first * second - first) * third));
+    // final.transpose();
+    // final.print();
+    
+    LinearRegression pipeline(10, std::vector<std::vector<double>>{{0,0}});
+    pipeline.initializeData(std::vector<std::vector<double>>{{1,5},{2,8},{3,10},{4,12}},std::vector<std::vector<double>>{{7,12,11,15}})->start();
+    pipeline.getWeights().print();
+    
     return 0;
 }
 
