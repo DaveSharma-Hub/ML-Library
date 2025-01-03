@@ -2,6 +2,8 @@
 #include <vector>
 #include <cstdint>
 #include <climits>
+#include <cmath>
+
 
 class Matrix{
   public:
@@ -193,7 +195,7 @@ class Matrix{
 
 class LinearRegression{
   public:
-    LinearRegression(uint64_t iterations_, std::vector<std::vector<double>> initialWeights_):iterations(iterations_){
+    LinearRegression(uint64_t iterations_, std::vector<std::vector<double>> initialWeights_, double learningRate_):iterations(iterations_), learningRate(learningRate_){
         Matrix weightMatrix(initialWeights_); 
         this->weights = weightMatrix;  
     }
@@ -217,8 +219,36 @@ class LinearRegression{
         Matrix transposedRawData = rawData.copy();
         transposedRawData.transpose();
         for(uint64_t i=0;i<this->iterations;i++){
-            weights = weights - (((weights * transposedRawData) - output) * rawData); 
+            weights = weights - (((weights * transposedRawData) - output) * rawData) * 2 * this->learningRate; 
+            weights.Normalize();
         }
+    }
+    
+    double getAbsoluteError(){
+        Matrix transposedRawData = rawData.copy();
+        transposedRawData.transpose();
+        Matrix diffMatrix = (weights * transposedRawData) - output;
+        std::vector<std::vector<double>> data = diffMatrix.getArray();
+        double error = 0;
+        for(int i=0;i<data[0].size();i++){
+            error += data[0][i]*data[0][i];
+        }
+        return sqrt(error);
+    }
+    double getPercentError(){
+        Matrix transposedRawData = rawData.copy();
+        transposedRawData.transpose();
+        Matrix diffMatrix = (weights * transposedRawData) - output;
+        std::vector<std::vector<double>> data = diffMatrix.getArray();
+        std::vector<std::vector<double>> expected = output.getArray();
+        
+        double error = 0;
+
+        for(int i=0;i<data[0].size();i++){
+            double v = data[0][i]/expected[0][i];
+            error += v<0 ? -1*v : v;
+        }
+        return sqrt(error);
     }
     
     Matrix& getWeights(){
@@ -230,20 +260,42 @@ class LinearRegression{
     Matrix rawData;
     Matrix output;
     uint64_t iterations;
+    double learningRate;
 };
 
 
+void testLearningRates(double initialLR, double delta, int steps, uint64_t iterations){
+    
+    double smallestLr = INT_MAX;
+    double percentError = INT_MAX;
+    double absoluteError = INT_MAX;
+    
+    for(double lr = initialLR;lr<initialLR + delta*steps;lr+=delta){
+        LinearRegression pipeline(iterations, std::vector<std::vector<double>>{{1,1}},lr);
+        pipeline.initializeData(std::vector<std::vector<double>>{{1,5},{2,8},{3,10},{4,12}},std::vector<std::vector<double>>{{7,12,11,15}})->start();
+        // pipeline.getWeights().print();
+        double pError = pipeline.getPercentError();
+        double aError = pipeline.getAbsoluteError();
+        if(aError < absoluteError && pError < percentError){
+            smallestLr = lr;
+            percentError = pError;
+            absoluteError = aError;
+        }
+    }
+    
+    std::cout<<"--------\nLearing rate: "<<smallestLr<<std::endl;
+        std::cout<<"Absolute: "<<absoluteError<<std::endl;
+        std::cout<<"Percent: "<<percentError<<std::endl;
+}
+
 int main(){
-    Matrix first(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
-    Matrix second(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
-    Matrix third(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
+    // Matrix first(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
+    // Matrix second(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
+    // Matrix third(std::vector<std::vector<double>>{{1,2,3},{4,5,6},{7,8,9}});
     // Matrix final = ((first) - ((first * second - first) * third));
     // final.transpose();
     // final.print();
-    
-    LinearRegression pipeline(1000, std::vector<std::vector<double>>{{1,1}});
-    pipeline.initializeData(std::vector<std::vector<double>>{{1,5},{2,8},{3,10},{4,12}},std::vector<std::vector<double>>{{7,12,11,15}})->start();
-    pipeline.getWeights().print();
+    testLearningRates(1.9,0.005,1000,10000);
     
     return 0;
 }
