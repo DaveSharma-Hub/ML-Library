@@ -12,7 +12,7 @@ class Matrix{
     Matrix(std::vector<std::vector<double>> input_): array(input_){};
     
     Matrix operator*(Matrix a){
-        return Matrix(this->matrixMult(
+        return Matrix(this->wrongMatrixMult(
             this->array,
             a.getArray()
         ));
@@ -23,6 +23,7 @@ class Matrix{
             value
         ));
     }
+    
     Matrix operator+(Matrix a){
         return Matrix(this->matrixAddition(
             this->array,
@@ -108,6 +109,35 @@ class Matrix{
   private:
     std::vector<std::vector<double>> array;
     
+    std::vector<std::vector<double>> wrongMatrixMult(std::vector<std::vector<double>>& first, std::vector<std::vector<double>>& second){
+        std::vector<std::vector<double>> matrix;
+        std::vector<double> firstReduced;
+        std::vector<double> secondReduced;
+        
+        for(int i=0;i<first.size();i++){
+            double value = 0;
+            for(int j=0;j<first[i].size();j++){
+                value += first[i][j];
+            }
+            firstReduced.push_back(value);
+        }
+        for(int i=0;i<second.size();i++){
+            double value = 0;
+            for(int j=0;j<second[i].size();j++){
+                value += second[i][j];
+            }
+            secondReduced.push_back(value);
+        }
+        
+        for(int i=0;i<firstReduced.size();i++){
+            std::vector<double> tmp;
+            for(int j=0;j<secondReduced.size();j++){
+                tmp.push_back(firstReduced[i]*secondReduced[j]);
+            }
+            matrix.push_back(tmp);
+        }
+        return matrix;
+    }
     std::vector<std::vector<double>> matrixMult(std::vector<std::vector<double>>& first, std::vector<std::vector<double>>& second){
         std::vector<std::vector<double>> matrix;
         for(int i=0;i<first.size();i++){
