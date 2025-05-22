@@ -1,6 +1,7 @@
 #include <vector>
 #include <stdint.h>
 #include <stdexcept>
+#include <cmath>
 
 template <class DataType>
 class Matrix{
@@ -37,7 +38,7 @@ class Matrix{
             return this->colCount;
         }
 
-        Matrix* mult(Matrix* B){
+        Matrix<DataType>* mult(Matrix<DataType>* B){
             if(B == nullptr){
                 throw std::invalid_argument("Null pointer argument");
             }
@@ -69,7 +70,21 @@ class Matrix{
             return newMatrix;
         }
 
-        Matrix* add(Matrix* A){
+        Matrix<DataType>* scalarMult(DataType value){
+            uint32_t firstRowCount = this->getRowCount();
+            uint32_t firstColCount = this->getColCount();
+
+            Matrix<DataType>* newMatrix = new Matrix<DataType>(firstRowCount, firstColCount);
+            for(int i=0;i<this->getRowCount();i++){
+                for(int j=0;j<this->getColCount();j++){
+                    DataType v = value * this->get(i,j);
+                    newMatrix->set(i, j, v);
+                }
+            }
+            return newMatrix;
+        }
+
+        Matrix<DataType>* add(Matrix<DataType>* A){
             // Assuming this + A;
             uint32_t firstRowCount = this->getRowCount();
             uint32_t firstColCount = this->getColCount();
@@ -77,19 +92,21 @@ class Matrix{
             Matrix<DataType>* newMatrix = new Matrix<DataType>(firstRowCount, firstColCount);
             for(int i=0;i<this->getRowCount();i++){
                 for(int j=0;j<this->getColCount();j++){
-                    newMatrix[i][j] = this->get(i,j) + A->get(i,j);
+                    DataType v = this->get(i,j) + A->get(i,j);
+                    newMatrix->set(i, j, v);
                 }
             }
             return newMatrix;
         }
-        Matrix* sub(Matrix* A){
+        Matrix<DataType>* sub(Matrix<DataType>* A){
             uint32_t firstRowCount = this->getRowCount();
             uint32_t firstColCount = this->getColCount();
             // Assuming this - A;
             Matrix<DataType>* newMatrix = new Matrix<DataType>(firstRowCount, firstColCount);
             for(int i=0;i<this->getRowCount();i++){
                 for(int j=0;j<this->getColCount();j++){
-                    newMatrix[i][j] = this->get(i,j) - A->get(i,j);
+                    DataType v = this->get(i,j) - A->get(i,j);
+                    newMatrix->set(i, j, v);
                 }
             }
             return newMatrix;
@@ -101,14 +118,69 @@ class Matrix{
              Matrix<DataType>* newMatrix = new Matrix<DataType>(rows, cols);
             for(int i=0;i<rows;i++){
                 for(int j=0;j<cols;j++){
-                    newMatrix[i][j] = this->get(i,j);
+                    newMatrix->set(i, j, this->get(i,j));
                 }
             }
             return newMatrix;
         }
 
+        DataType sum(){
+            DataType total = 0;
+            uint32_t rows = this->getRowCount();
+            uint32_t cols = this->getColCount();
+
+            for(int i=0;i<rows;i++){
+                for(int j=0;j<cols;j++){
+                    total += this->matrix[i][j]; 
+                }
+            }
+            return total;
+        }
+
+        DataType mean(){
+            DataType total = 0;
+            int count = 0;
+            uint32_t rows = this->getRowCount();
+            uint32_t cols = this->getColCount();
+
+            for(int i=0;i<rows;i++){
+                for(int j=0;j<cols;j++){
+                    total += this->matrix[i][j]; 
+                    count++;
+                }
+            }
+            return (DataType)(total/count);
+        }
+
+        Matrix<DataType>* power(int v){
+            Matrix<DataType>* newMatrix = new Matrix<DataType>(this->getRowCount(), this->getColCount());
+            uint32_t rows = this->getRowCount();
+            uint32_t cols = this->getColCount();
+            for(int i=0;i<rows;i++){
+                for(int j=0;j<cols;j++){
+                    DataType newValue = this->get(i,j);
+                    newMatrix->set(i,j, pow(newValue, v));
+                }
+            }
+            return newMatrix;
+        }
+
+        Matrix<DataType>* rowCollapse(){
+            Matrix<DataType>* newMatrix = new Matrix<DataType>(1, this->getColCount());
+            uint32_t rows = this->getRowCount();
+            uint32_t cols = this->getColCount();
+            for(int j=0;j<cols;j++){
+                DataType sum = 0;
+                for(int i=0;i<rows;i++){
+                    sum += this->get(i,j);
+                }
+                newMatrix->set(0,j, sum);
+            }
+            return newMatrix;
+        }
+
         void transpose(){
-            std::vector<std::vector<DataType>>& m = this->matrx;
+            std::vector<std::vector<DataType>>& m = this->matrix;
             for(int i=0;i<m.size();i++){
                 for(int j=0;j<m[i].size();j++){
                     DataType first = m[i][j];
